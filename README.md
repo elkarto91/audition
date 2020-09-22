@@ -1,2 +1,2 @@
-# audition
-Audition Project
+# Audition
+Project for Golang
