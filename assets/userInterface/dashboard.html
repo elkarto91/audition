@@ -8,6 +8,60 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
         body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        .topnav a {
+            float: left;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+        }
+
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .topnav a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button {
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+
+        .button1 {
+            background-color: white;
+            color: black;
+            border: 2px solid #4CAF50;
+        }
+
+        .button1:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+    </style>
+    <style>
+        body {
             font-family: "Lato", sans-serif;
         }
 
@@ -52,6 +106,10 @@
     <title>Dashboard</title>
 </head>
 <body>
+<div class="topnav">
+    <a class="active" style="padding-left: 15px">Logged In User :&nbsp;<span id="userName">{{.User}}</span></a>
+</div>
+
 <div id="mySidenav" class="sidenav">
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
     <a href="/dashboard">Home</a>
@@ -67,43 +125,99 @@
         <div class="panel panel-default">
             <div class="panel-heading">Write New Comment</div>
             <div class="panel-body">
-                Panel Content
+                <form class="text-area">
+                    <label for="comment">Comment:&nbsp;&nbsp;</label>
+                    <textarea id="comment" name="comment" rows="4" cols="50"></textarea>
+                </form>
+                <button class="button button1" onclick="SubmitComment();">Submit</button>
             </div>
         </div>
-
         <div class="panel panel-primary">
-            <div class="panel-heading">M</div>
-            <div class="panel-body">Panel Content</div>
-        </div>
-
-        <div class="panel panel-success">
-            <div class="panel-heading">Panel with panel-success class</div>
-            <div class="panel-body">Panel Content</div>
-        </div>
-
-        <div class="panel panel-info">
-            <div class="panel-heading">Panel with panel-info class</div>
-            <div class="panel-body">Panel Content</div>
-        </div>
-
-        <div class="panel panel-warning">
-            <div class="panel-heading">Panel with panel-warning class</div>
-            <div class="panel-body">Panel Content</div>
-        </div>
-
-        <div class="panel panel-danger">
-            <div class="panel-heading">Panel with panel-danger class</div>
-            <div class="panel-body">Panel Content</div>
+            <div class="panel-heading">Message Board</div>
+            <div class="panel-body">All Messages</div>
+            <table>
+                <thead>
+                <th>#</th>
+                <th>Comment ID</th>
+                <th>Comment</th>
+                <th>User Name</th>
+                <th>Action</th>
+                </thead>
+                <tbody id="commentList"></tbody>
+            </table>
         </div>
     </div>
 </div>
 <script>
+    $(document).ready(function () {
+        SetValues();
+    });
+
     function openNav() {
         document.getElementById("mySidenav").style.display = "block";
     }
 
     function closeNav() {
         document.getElementById("mySidenav").style.display = "none";
+    }
+
+    function SubmitComment() {
+
+        var userName= $('#userName span').text();
+        var details={};
+        details.comment=$("#comment").val();
+        details.username=userName;
+        details.comment_id=makeid(7);
+
+        console.log(JSON.stringify(details));
+
+        $.ajax({
+            type: "POST",
+            url: "/submitComment",
+            data:  JSON.stringify(details),
+            success: function (data) {
+                console.log(JSON.stringify(data));
+                if(data.Status){
+                    alert("Comment Submitted");
+                }else{
+                    alert("Comment Failed");
+                }
+            },
+        });
+        location.reload();
+    }
+
+    function makeid(length) {
+        var result           = '';
+        var characters       = '0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function SetValues() {
+
+        var result;
+        console.log(JSON.stringify(result));
+        result = {{.Updates}};
+        if(result != null){
+            for(var i=0;i<result.length;i++){
+                var val;
+                val=parseInt(i);
+                val=val+1;
+                document.getElementById("commentList").innerHTML += "<tr><td>"+val+"</td>" +
+                    "<td>"+result[i].comment_id+"</td>" +
+                    "<td>"+result[i].comment+"</td>" +
+                    "<td>"+result[i].username+"</td>" +
+                    "<td><button class='btn btn-sm btn-primary center-block ladda-button' data-style= 'expand-right' onclick= 'paliendrome("+JSON.stringify(result[i])+");'>Check Paliendrome</button></td>" +
+                    "<td><button class='btn btn-sm btn-primary center-block ladda-button' data-style= 'expand-right' onclick= 'deleteNow("+JSON.stringify(result[i])+");'>Delete Comment</button></td>" +
+                    "</tr>";
+            }
+        }else{
+            document.getElementById("commentList").innerHTML = "<tr><td colspan='7' class='text-center'>No Records Found.</td></tr>" ;
+        }
     }
 </script>
 </body>

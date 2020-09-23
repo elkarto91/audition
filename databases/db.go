@@ -3,7 +3,7 @@ package databases
 import (
 	"errors"
 	"fmt"
-	models "github.com/elkarto91/audition/common"
+	common "github.com/elkarto91/audition/common"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
@@ -14,8 +14,9 @@ var (
 )
 
 const (
-	Database       = "auditionDb"
-	UserCollection = "userCollection"
+	Database          = "auditionDb"
+	UserCollection    = "userCollection"
+	CommentCollection = "commentCollection"
 )
 
 func getMongoSession() (*mgo.Session, error) {
@@ -46,10 +47,26 @@ func InitMongo() error {
 	if err != nil {
 		return fmt.Errorf("error initialing indexes db %v", err)
 	}
+
+	commentSes := session.DB(Database).C(CommentCollection)
+
+	// Index
+	indexCom := mgo.Index{
+		Key:        []string{"comment_id"},
+		Unique:     true,
+		DropDups:   true,
+		Background: true,
+		Sparse:     true,
+	}
+
+	err = commentSes.EnsureIndex(indexCom)
+	if err != nil {
+		return fmt.Errorf("error initialing indexes db %v", err)
+	}
 	return nil
 }
 
-func RegisterUser(user *models.User) error {
+func RegisterUser(user *common.User) error {
 
 	if user.Username != "" && user.Password != "" {
 		cost := bcrypt.DefaultCost
@@ -62,7 +79,7 @@ func RegisterUser(user *models.User) error {
 	}
 	return ErrInvalidCredentials
 }
-func AddUser(user *models.User) error {
+func AddUser(user *common.User) error {
 	session, err := getMongoSession()
 	if err != nil {
 		return err
@@ -76,7 +93,7 @@ func AddUser(user *models.User) error {
 	return nil
 }
 
-func UpdateUser(user *models.User) error {
+func UpdateUser(user *common.User) error {
 	session, err := getMongoSession()
 	if err != nil {
 		return err
@@ -91,14 +108,14 @@ func UpdateUser(user *models.User) error {
 	return nil
 }
 
-func ListAllUsers() ([]*models.User, error) {
+func ListAllUsers() ([]*common.User, error) {
 	session, err := getMongoSession()
 	if err != nil {
 		return nil, err
 	}
 	defer session.Close()
 	c := session.DB(Database).C(UserCollection)
-	var users []*models.User
+	var users []*common.User
 	err = c.Find(nil).Select(nil).All(&users)
 	if err != nil {
 		return nil, err
@@ -106,7 +123,7 @@ func ListAllUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func GetUserByUsername(username string) (*models.User, error) {
+func GetUserByUsername(username string) (*common.User, error) {
 	if exists, err := DoesUserExist(username); exists && err == nil {
 		session, err := getMongoSession()
 		if err != nil {
@@ -114,7 +131,7 @@ func GetUserByUsername(username string) (*models.User, error) {
 		}
 		defer session.Close()
 		c := session.DB(Database).C(UserCollection)
-		user := &models.User{}
+		user := &common.User{}
 		err = c.Find(bson.M{"username": username}).One(user)
 		if err != nil {
 			return nil, err
@@ -141,7 +158,7 @@ func DoesUserExist(username string) (bool, error) {
 	return i > 0, nil
 }
 
-func AuthenticateUser(username, password string) (*models.User, error) {
+func AuthenticateUser(username, password string) (*common.User, error) {
 	user, err := GetUserByUsername(username)
 	if err != nil {
 		return nil, err
@@ -150,4 +167,87 @@ func AuthenticateUser(username, password string) (*models.User, error) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 	return user, nil
+}
+func AddComment(comment *common.Comment) error {
+	session, err := getMongoSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	c := session.DB(Database).C(CommentCollection)
+	err = c.Insert(comment)
+	if err != nil {
+		return fmt.Errorf("error inserting user to db %v", err)
+	}
+	return nil
+}
+
+func ListAlComments() ([]*common.Comment, error) {
+	session, err := getMongoSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+	c := session.DB(Database).C(CommentCollection)
+	var comments []*common.Comment
+	err = c.Find(nil).Select(nil).All(&comments)
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func DoesCommentExist(commentId string) (bool, error) {
+	session, err := getMongoSession()
+	if err != nil {
+		return false, err
+	}
+	defer session.Close()
+	c := session.DB(Database).C(CommentCollection)
+	i, err := c.Find(bson.M{"comment_id": commentId}).Count()
+	if err != nil {
+		return false, err
+	}
+	return i > 0, nil
+}
+
+func GetCommentByCommentId(commentId string) (*common.Comment, error) {
+	if exists, err := DoesCommentExist(commentId); exists && err == nil {
+		session, err := getMongoSession()
+		if err != nil {
+			return nil, err
+		}
+		defer session.Close()
+		c := session.DB(Database).C(CommentCollection)
+		comment := &common.Comment{}
+		err = c.Find(bson.M{"comment_id": commentId}).One(comment)
+		if err != nil {
+			return nil, err
+		}
+		return comment, nil
+	} else if err != nil {
+		return nil, err
+	} else {
+		return nil, fmt.Errorf("no such comment found with comment ID = [%v] ", commentId)
+	}
+}
+func DeleteCommentExist(commentId string) (bool, error) {
+	session, err := getMongoSession()
+	if err != nil {
+		return false, err
+	}
+	defer session.Close()
+	c := session.DB(Database).C(CommentCollection)
+	i, err := c.Find(bson.M{"comment_id": commentId}).Count()
+	if err != nil {
+		return false, err
+	}
+	if i > 0 {
+		err = c.Remove(bson.M{"comment_id": commentId})
+		if err != nil {
+			fmt.Println("Delete Key Failed ", err.Error())
+			return false, err
+		}
+	}
+	return true, nil
 }

@@ -30,6 +30,8 @@ func main() {
 
 	r.HandleFunc("/register", models.HandleRegistry).Methods("GET")
 	r.HandleFunc("/register", models.RegisterUser).Methods("POST")
+	r.HandleFunc("/submitComment", models.SubmitComment).Methods("POST")
+
 	//r.HandleFunc("/dashboard", models.RegisterUser).Methods("GET")
 
 	/*	staticFileDirectory := http.FileServer(http.Dir("/assets/static"))
