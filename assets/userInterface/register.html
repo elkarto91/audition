@@ -112,12 +112,12 @@
 <body>
 <div class="login-page">
     <div class="form">
-        <form class="register-form">
-            <input type="text" placeholder="admin username"/>
-            <input type="password" placeholder="admin password"/>
-            <input type="text" placeholder="name"/>
-            <input type="password" placeholder="password"/>
-            <button>Register</button>
+        <form class="register-form" method="POST" id="userForm" name="userForm">
+            <input type="text" placeholder="admin username" id="admin" name="admin"/>
+            <input type="password" placeholder="admin password" id="adminpass" name="adminpass"/>
+            <input type="text" placeholder="name" id="username" name="username"/>
+            <input type="password" placeholder="password" id="password" name="password"/>
+            <button type="submit">Register</button>
         </form>
     </div>
 </div>
