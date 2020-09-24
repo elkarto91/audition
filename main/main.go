@@ -31,8 +31,8 @@ func main() {
 	r.HandleFunc("/register", models.HandleRegistry).Methods("GET")
 	r.HandleFunc("/register", models.RegisterUser).Methods("POST")
 	r.HandleFunc("/submitComment", models.SubmitComment).Methods("POST")
-
-	//r.HandleFunc("/dashboard", models.RegisterUser).Methods("GET")
+	r.HandleFunc("/deleteComment", models.DeleteComment).Methods("POST")
+	r.HandleFunc("/checkComment", models.CheckComment).Methods("POST")
 
 	/*	staticFileDirectory := http.FileServer(http.Dir("/assets/static"))
 		r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", staticFileDirectory))*/
@@ -40,5 +40,4 @@ func main() {
 	if err != nil {
 		logger.Fatalln("Server failed")
 	}
-
 }

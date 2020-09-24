@@ -94,7 +94,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 func SubmitComment(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Audition Application Login Page Requested")
+	logger.Infoln("Adding Comment")
 	HeaderXframeUtility(w, r)
 
 	var req common.Comment
@@ -114,4 +114,77 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
 	//executeTemplate(w, "dashboard.html",nil)
 
+}
+
+func DeleteComment(w http.ResponseWriter, r *http.Request) {
+
+	logger := SetLoggerText()
+	logger.Infoln("Deleting Comment")
+	HeaderXframeUtility(w, r)
+
+	var req common.Comment
+	err := PostToInterface(r.Body, &req)
+	if err != nil {
+		logger.Errorln("ERROR -------> ", err.Error())
+		executeTemplate(w, "dashboard.html", http.StatusOK)
+		return
+	}
+
+	status, err := databases.DeleteCommentExist(req.CommentId)
+	if err != nil {
+		logger.Errorln("Database Deletion error: ", err)
+	}
+	logger.Infoln("Database updated for user: ", req.Username, " for comment id", req.CommentId, " with status", status)
+	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
+}
+func CheckComment(w http.ResponseWriter, r *http.Request) {
+
+	logger := SetLoggerText()
+	logger.Infoln("Checking Comment")
+	HeaderXframeUtility(w, r)
+
+	var req common.Comment
+	err := PostToInterface(r.Body, &req)
+	if err != nil {
+		logger.Errorln("ERROR -------> ", err.Error())
+		executeTemplate(w, "dashboard.html", http.StatusOK)
+		return
+	}
+	flag := checkPaliendrome(req.Comment)
+	if flag == true {
+		logger.Infoln("Comment : ", req.Comment, " is a paliendrome :", flag)
+		data := struct {
+			Success bool
+			Msg     string
+		}{true, "Paliendrome"}
+		ReturnJSONAPISuccess(w, data)
+	} else {
+		logger.Infoln("Comment : ", req.Comment, " is not a paliendrome :", flag)
+		data := struct {
+			Success bool
+			Msg     string
+		}{true, "Not a Paliendrome"}
+		ReturnJSONAPISuccess(w, data)
+	}
+}
+
+func checkPaliendrome(comment string) bool {
+
+	startPointer := 0
+	lengthOfString := len(comment)
+	endPointer := lengthOfString - 1
+	paliendromeFlag := true
+	commentRune := []rune(comment)
+
+	for startPointer <= endPointer {
+		if commentRune[startPointer] == commentRune[endPointer] {
+			startPointer++
+			endPointer--
+			continue
+		} else {
+			paliendromeFlag = false
+			return paliendromeFlag
+		}
+	}
+	return paliendromeFlag
 }

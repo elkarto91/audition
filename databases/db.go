@@ -204,7 +204,7 @@ func DoesCommentExist(commentId string) (bool, error) {
 	}
 	defer session.Close()
 	c := session.DB(Database).C(CommentCollection)
-	i, err := c.Find(bson.M{"comment_id": commentId}).Count()
+	i, err := c.Find(bson.M{"commentid": commentId}).Count()
 	if err != nil {
 		return false, err
 	}
@@ -220,7 +220,7 @@ func GetCommentByCommentId(commentId string) (*common.Comment, error) {
 		defer session.Close()
 		c := session.DB(Database).C(CommentCollection)
 		comment := &common.Comment{}
-		err = c.Find(bson.M{"comment_id": commentId}).One(comment)
+		err = c.Find(bson.M{"commentid": commentId}).One(comment)
 		if err != nil {
 			return nil, err
 		}
@@ -237,13 +237,12 @@ func DeleteCommentExist(commentId string) (bool, error) {
 		return false, err
 	}
 	defer session.Close()
-	c := session.DB(Database).C(CommentCollection)
-	i, err := c.Find(bson.M{"comment_id": commentId}).Count()
-	if err != nil {
-		return false, err
-	}
-	if i > 0 {
-		err = c.Remove(bson.M{"comment_id": commentId})
+	yes, err := DoesCommentExist(commentId)
+	if yes {
+		fmt.Println("Comment ID exists, initiating deletion")
+		c := session.DB(Database).C(CommentCollection)
+		err = c.Remove(bson.M{"commentid": commentId})
+		fmt.Println("Removed comment")
 		if err != nil {
 			fmt.Println("Delete Key Failed ", err.Error())
 			return false, err

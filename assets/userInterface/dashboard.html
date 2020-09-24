@@ -102,12 +102,28 @@
             .sidenav {padding-top: 15px;}
             .sidenav a {font-size: 18px;}
         }
+        table {
+            border-spacing: 1em .5em;
+            padding: 0 2em 1em 0;
+            border: 1px solid orange;
+        }
+
+        td {
+            width: 1.5em;
+            height: 1.5em;
+            background: #d2d2d2;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .panel-primary {
+            border-spacing: 5px;
+        }
     </style>
     <title>Dashboard</title>
 </head>
 <body>
 <div class="topnav">
-    <a class="active" style="padding-left: 15px">Logged In User :&nbsp;<span id="userName">{{.User}}</span></a>
+    <a class="active" style="padding-left: 15px">Logged In User :&nbsp;<span class="myspan" id="userName">{{.User}}</span></a>
 </div>
 
 <div id="mySidenav" class="sidenav">
@@ -134,17 +150,19 @@
         </div>
         <div class="panel panel-primary">
             <div class="panel-heading">Message Board</div>
-            <div class="panel-body">All Messages</div>
-            <table>
-                <thead>
-                <th>#</th>
-                <th>Comment ID</th>
-                <th>Comment</th>
-                <th>User Name</th>
-                <th>Action</th>
-                </thead>
-                <tbody id="commentList"></tbody>
-            </table>
+            <div class="panel-body">
+                    <table>
+                        <thead>
+                        <th>Sl No</th>
+                        <th>Comment ID</th>
+                        <th>Comment</th>
+                        <th>User Name</th>
+                        <th>Function</th>
+                        <th>Action</th>
+                        </thead>
+                        <tbody id="commentList"></tbody>
+                    </table>
+            </div>
         </div>
     </div>
 </div>
@@ -163,12 +181,11 @@
 
     function SubmitComment() {
 
-        var userName= $('#userName span').text();
+        var userName= $('.myspan').text();
         var details={};
         details.comment=$("#comment").val();
         details.username=userName;
         details.comment_id=makeid(7);
-
         console.log(JSON.stringify(details));
 
         $.ajax({
@@ -218,6 +235,51 @@
         }else{
             document.getElementById("commentList").innerHTML = "<tr><td colspan='7' class='text-center'>No Records Found.</td></tr>" ;
         }
+    }
+
+    function deleteNow(data){
+
+        var details={};
+        details.comment_id=data.comment_id;
+        console.log(JSON.stringify(details));
+
+        $.ajax({
+            type: "POST",
+            url: "/deleteComment",
+            data:  JSON.stringify(details),
+            success: function (data) {
+                console.log(JSON.stringify(data));
+                if(data.Status){
+                    alert("Comment Deleted");
+                }else{
+                    alert("Comment Deletion Failed");
+                }
+            },
+        });
+        location.reload();
+    }
+
+
+    function paliendrome(data){
+
+        var details={};
+        details.comment=data.comment;
+        console.log(JSON.stringify(details));
+
+        $.ajax({
+            type: "POST",
+            url: "/checkComment",
+            data:  JSON.stringify(details),
+            success: function (data) {
+                console.log(JSON.stringify(data));
+                if(data.Status){
+                    alert("Comment Checked "+JSON.stringify(data.Extra.Msg));
+                }else{
+                    alert("Comment Checked Failed"+JSON.stringify(data));
+                }
+            },
+        });
+        location.reload();
     }
 </script>
 </body>
