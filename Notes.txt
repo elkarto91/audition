@@ -1,0 +1,9 @@
+####
+golang compiled lang only binary is needed
+java is compiled and interpreted needs war jar and all
+if we run binary along with html pages,and dependencies app should run
+so we create a golang container
+we add html and all into it
+docker run -it golang /bin/bash
+ADD from /working/to
+docker build -t imagename filename
