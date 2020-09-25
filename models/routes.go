@@ -20,7 +20,7 @@ var (
 func HandleHome(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Audition Application Login Page Requested")
+	logger.Infoln("Audition Application Login Page Rendering")
 	HeaderXframeUtility(w, r)
 	executeTemplate(w, "login.html", nil)
 
@@ -30,7 +30,7 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
 func HandleDashboard(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Audition Application Dashboard Page")
+	logger.Infoln("Audition Application Dashboard Page Rendering")
 	HeaderXframeUtility(w, r)
 
 	_ = r.ParseForm()
@@ -60,7 +60,7 @@ func HandleDashboard(w http.ResponseWriter, r *http.Request) {
 func HandleRegistry(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Audition Application Register Page")
+	logger.Infoln("Audition Application Register Page Rendering")
 	HeaderXframeUtility(w, r)
 	executeTemplate(w, "register.html", nil)
 
@@ -68,7 +68,7 @@ func HandleRegistry(w http.ResponseWriter, r *http.Request) {
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Audition Application Register User")
+	logger.Infoln("Audition Application Register User Rendering")
 	HeaderXframeUtility(w, r)
 
 	_ = r.ParseForm()
@@ -112,7 +112,9 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 		logger.Errorln("ERROR -------> ", err.Error())
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
+	logger.Infoln("The request received ", req)
 
+	logger.Infoln("Adding to Database")
 	err = databases.AddComment(&req)
 	if err != nil {
 		logger.Errorln("Database updation error: ", err)
@@ -120,6 +122,7 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Infoln("Database updated for user: ", req.Username)
 	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
+
 }
 
 func DeleteComment(w http.ResponseWriter, r *http.Request) {
@@ -135,11 +138,13 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 
+	logger.Infoln("Deleting from Database ", req.CommentId)
 	status, err := databases.DeleteIfCommentExist(req.CommentId)
 	if err != nil {
 		logger.Errorln("Database Deletion error: ", err)
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
+
 	logger.Infoln("Database updated for user: ", req.Username, " for comment id", req.CommentId, " with status", status)
 	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
 }
@@ -155,6 +160,8 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 		logger.Errorln("ERROR -------> ", err.Error())
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
+
+	logger.Infoln("Checking Palindrome for ", req)
 	flag := CheckPaliendrome(req.Comment)
 	if flag == true {
 		logger.Infoln("Comment : ", req.Comment, " is a palindrome :", flag)
@@ -175,6 +182,8 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 
 func CheckPaliendrome(comment string) bool {
 
+	logger := SetLoggerText()
+
 	startPointer := 0
 	lengthOfString := len(comment)
 	endPointer := lengthOfString - 1
@@ -187,6 +196,7 @@ func CheckPaliendrome(comment string) bool {
 			endPointer--
 			continue
 		} else {
+			logger.Warningln("Character Mismatch at ", commentRune[startPointer], " and ", commentRune[endPointer])
 			paliendromeFlag = false
 			return paliendromeFlag
 		}

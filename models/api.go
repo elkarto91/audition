@@ -1,5 +1,10 @@
 package models
 
+//elkarto91@Author : Karthik
+
+//URL Example:  http://abc:123@localhost:8080//api/demo/register?adminun=admin&adminpass=password&username=user9&userpass=9asdak4
+// http://localhost:8080//api/demo/register?adminun=admin&adminpass=password&username=user9&userpass=9asdak4
+
 import (
 	"github.com/elkarto91/audition/common"
 	"github.com/elkarto91/audition/databases"
@@ -7,6 +12,7 @@ import (
 	"net/http"
 )
 
+//Register User Rest API
 func RegisterUserAPI(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
@@ -37,7 +43,7 @@ func RegisterUserAPI(w http.ResponseWriter, r *http.Request) {
 		logger.Errorln("Url Param 'User Password' is missing")
 		ReturnJSONAPIErrorWithMessage(w, ErrKeyMissing)
 	}
-	log.Println("The Admin Data Received Are : ", userName, userPass)
+	logger.Infoln("The Admin Data Received Are : ", userName, userPass)
 
 	if adminName[0] != "admin" {
 		logger.Error("Admin Credential Mismatch ", ErrIncorrectAdminCredentials)
