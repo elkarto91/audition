@@ -1,9 +1,12 @@
 package databases
 
+//elkarto91@Author : Karthik
+//Database file for MongoDB
+
 import (
 	"errors"
 	"fmt"
-	common "github.com/elkarto91/audition/common"
+	"github.com/elkarto91/audition/common"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
@@ -19,6 +22,7 @@ const (
 	CommentCollection = "commentCollection"
 )
 
+//Mongo DB session initiation
 func getMongoSession() (*mgo.Session, error) {
 	session, err := mgo.Dial("localhost:27017")
 	if err != nil {
@@ -26,6 +30,8 @@ func getMongoSession() (*mgo.Session, error) {
 	}
 	return session, nil
 }
+
+//Initializing MongoDB with collections and indexing for faster access
 func InitMongo() error {
 	session, err := getMongoSession()
 	if err != nil {
@@ -66,8 +72,10 @@ func InitMongo() error {
 	return nil
 }
 
+//Register User into User Collection
 func RegisterUser(user *common.User) error {
 
+	//Encrypting Password
 	if user.Username != "" && user.Password != "" {
 		cost := bcrypt.DefaultCost
 		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), cost)
@@ -79,6 +87,8 @@ func RegisterUser(user *common.User) error {
 	}
 	return ErrInvalidCredentials
 }
+
+//Adding username and encrypted password to DB
 func AddUser(user *common.User) error {
 	session, err := getMongoSession()
 	if err != nil {
@@ -93,6 +103,7 @@ func AddUser(user *common.User) error {
 	return nil
 }
 
+//Update user if NEEDED
 func UpdateUser(user *common.User) error {
 	session, err := getMongoSession()
 	if err != nil {
@@ -108,6 +119,7 @@ func UpdateUser(user *common.User) error {
 	return nil
 }
 
+//Lists all users from DB
 func ListAllUsers() ([]*common.User, error) {
 	session, err := getMongoSession()
 	if err != nil {
@@ -123,6 +135,7 @@ func ListAllUsers() ([]*common.User, error) {
 	return users, nil
 }
 
+//Get user details using username as index
 func GetUserByUsername(username string) (*common.User, error) {
 	if exists, err := DoesUserExist(username); exists && err == nil {
 		session, err := getMongoSession()
@@ -144,6 +157,7 @@ func GetUserByUsername(username string) (*common.User, error) {
 	}
 }
 
+//Check if record exist
 func DoesUserExist(username string) (bool, error) {
 	session, err := getMongoSession()
 	if err != nil {
@@ -158,6 +172,7 @@ func DoesUserExist(username string) (bool, error) {
 	return i > 0, nil
 }
 
+//Authenticate User by comparing DB record
 func AuthenticateUser(username, password string) (*common.User, error) {
 	user, err := GetUserByUsername(username)
 	if err != nil {
@@ -168,6 +183,8 @@ func AuthenticateUser(username, password string) (*common.User, error) {
 	}
 	return user, nil
 }
+
+//Add comment to comment collection
 func AddComment(comment *common.Comment) error {
 	session, err := getMongoSession()
 	if err != nil {
@@ -182,6 +199,7 @@ func AddComment(comment *common.Comment) error {
 	return nil
 }
 
+//List all comments from DB
 func ListAlComments() ([]*common.Comment, error) {
 	session, err := getMongoSession()
 	if err != nil {
@@ -197,6 +215,7 @@ func ListAlComments() ([]*common.Comment, error) {
 	return comments, nil
 }
 
+//Check if comment exist in DB
 func DoesCommentExist(commentId string) (bool, error) {
 	session, err := getMongoSession()
 	if err != nil {
@@ -211,6 +230,7 @@ func DoesCommentExist(commentId string) (bool, error) {
 	return i > 0, nil
 }
 
+//Fetch comment by comment ID
 func GetCommentByCommentId(commentId string) (*common.Comment, error) {
 	if exists, err := DoesCommentExist(commentId); exists && err == nil {
 		session, err := getMongoSession()
@@ -231,7 +251,9 @@ func GetCommentByCommentId(commentId string) (*common.Comment, error) {
 		return nil, fmt.Errorf("no such comment found with comment ID = [%v] ", commentId)
 	}
 }
-func DeleteCommentExist(commentId string) (bool, error) {
+
+//Delete comment if it exists
+func DeleteIfCommentExist(commentId string) (bool, error) {
 	session, err := getMongoSession()
 	if err != nil {
 		return false, err
@@ -239,12 +261,9 @@ func DeleteCommentExist(commentId string) (bool, error) {
 	defer session.Close()
 	yes, err := DoesCommentExist(commentId)
 	if yes {
-		fmt.Println("Comment ID exists, initiating deletion")
 		c := session.DB(Database).C(CommentCollection)
 		err = c.Remove(bson.M{"commentid": commentId})
-		fmt.Println("Removed comment")
 		if err != nil {
-			fmt.Println("Delete Key Failed ", err.Error())
 			return false, err
 		}
 	}

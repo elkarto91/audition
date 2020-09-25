@@ -2,7 +2,6 @@ package main
 
 //elkarto91@Author : Karthik
 //Main file for setting up the golang server and routing for the APIs
-//
 import (
 	"github.com/elkarto91/audition/databases"
 	"github.com/elkarto91/audition/models"
@@ -55,8 +54,9 @@ func main() {
 	r.HandleFunc("/api/checkComment", models.BasicAuthMiddleware(http.HandlerFunc(models.CheckCommentAPI))).Methods("POST")
 	r.HandleFunc("/api/viewAllComment", models.BasicAuthMiddleware(http.HandlerFunc(models.GetAllCommentAPI))).Methods("GET")
 
+	//Start serve
 	err = http.ListenAndServe(":8080", r)
 	if err != nil {
-		logger.Fatalln("Server failed")
+		logger.Fatalln("Server failed", err.Error())
 	}
 }

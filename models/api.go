@@ -124,7 +124,7 @@ func DeleteCommentAPI(w http.ResponseWriter, r *http.Request) {
 		logger.Errorln("Url Param 'commentid' is missing")
 		ReturnJSONAPIErrorWithMessage(w, ErrKeyMissing)
 	}
-	status, err := databases.DeleteCommentExist(commentID[0])
+	status, err := databases.DeleteIfCommentExist(commentID[0])
 	if err != nil {
 		logger.Errorln("Database Deletion error: ", err)
 		ReturnJSONAPIErrorWithMessage(w, err.Error())

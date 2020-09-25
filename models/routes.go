@@ -135,7 +135,7 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 
-	status, err := databases.DeleteCommentExist(req.CommentId)
+	status, err := databases.DeleteIfCommentExist(req.CommentId)
 	if err != nil {
 		logger.Errorln("Database Deletion error: ", err)
 		ReturnJSONAPIErrorWithMessage(w, err.Error())
