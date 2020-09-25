@@ -1,5 +1,7 @@
 package models
 
+//elkarto91@Author : Karthik
+//GET & POST Handlers
 import (
 	"errors"
 	"github.com/elkarto91/audition/common"
@@ -7,17 +9,24 @@ import (
 	"net/http"
 )
 
+//Error Type
 var (
 	ErrIncorrectAdminCredentials = errors.New("admin credentials dont match")
+	ErrKeyMissing                = errors.New("key missing in url parameters")
+	ErrCommentMissing            = errors.New("comment missing in datbase")
 )
 
+//Handle Home Page - Login Page ; Since no cookie is being used this will be fine
 func HandleHome(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
 	logger.Infoln("Audition Application Login Page Requested")
 	HeaderXframeUtility(w, r)
 	executeTemplate(w, "login.html", nil)
+
 }
+
+//Handling the dashboard for someone who logs in with account credentials
 func HandleDashboard(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
@@ -101,19 +110,16 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 	err := PostToInterface(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		executeTemplate(w, "dashboard.html", http.StatusOK)
-		return
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 
 	err = databases.AddComment(&req)
 	if err != nil {
 		logger.Errorln("Database updation error: ", err)
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 	logger.Infoln("Database updated for user: ", req.Username)
-
 	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
-	//executeTemplate(w, "dashboard.html",nil)
-
 }
 
 func DeleteComment(w http.ResponseWriter, r *http.Request) {
@@ -126,13 +132,13 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 	err := PostToInterface(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		executeTemplate(w, "dashboard.html", http.StatusOK)
-		return
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 
 	status, err := databases.DeleteCommentExist(req.CommentId)
 	if err != nil {
 		logger.Errorln("Database Deletion error: ", err)
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
 	logger.Infoln("Database updated for user: ", req.Username, " for comment id", req.CommentId, " with status", status)
 	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
@@ -147,16 +153,15 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 	err := PostToInterface(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		executeTemplate(w, "dashboard.html", http.StatusOK)
-		return
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
 	}
-	flag := checkPaliendrome(req.Comment)
+	flag := CheckPaliendrome(req.Comment)
 	if flag == true {
-		logger.Infoln("Comment : ", req.Comment, " is a paliendrome :", flag)
+		logger.Infoln("Comment : ", req.Comment, " is a palindrome :", flag)
 		data := struct {
 			Success bool
 			Msg     string
-		}{true, "Paliendrome"}
+		}{true, "Palindrome"}
 		ReturnJSONAPISuccess(w, data)
 	} else {
 		logger.Infoln("Comment : ", req.Comment, " is not a paliendrome :", flag)
@@ -168,7 +173,7 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkPaliendrome(comment string) bool {
+func CheckPaliendrome(comment string) bool {
 
 	startPointer := 0
 	lengthOfString := len(comment)
@@ -187,4 +192,28 @@ func checkPaliendrome(comment string) bool {
 		}
 	}
 	return paliendromeFlag
+}
+func ViewAllComments(w http.ResponseWriter, r *http.Request) {
+
+	logger := SetLoggerText()
+	logger.Infoln("Audition Application Dashboard Page")
+	HeaderXframeUtility(w, r)
+
+	_ = r.ParseForm()
+	username := r.PostForm.Get("username")
+	password := r.PostForm.Get("password")
+
+	user, err := databases.AuthenticateUser(username, password)
+	if err != nil {
+		logger.Errorln("Database updation error: ", err)
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
+	}
+	logger.Infoln("User Authenticated : ", user)
+
+	comments, err := databases.ListAlComments()
+	if err != nil {
+		logger.Errorln("Database Comment error: ", err)
+		ReturnJSONAPIErrorWithMessage(w, err.Error())
+	}
+	ReturnJSONAPISuccess(w, comments)
 }

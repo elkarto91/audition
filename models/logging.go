@@ -1,5 +1,8 @@
 package models
 
+//elkarto91@Author : Karthik
+//Using Logrus logger utility, it gives quite a good look for the logs
+
 import "github.com/sirupsen/logrus"
 
 func SetLoggerText() *logrus.Logger {

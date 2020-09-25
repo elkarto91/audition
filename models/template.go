@@ -41,3 +41,16 @@ func ReturnJSONAPISuccess(w http.ResponseWriter, extra interface{}) {
 	}
 	return
 }
+func ReturnJSONAPIErrorWithMessage(w http.ResponseWriter, extra interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	j, _ := json.Marshal(struct {
+		Status bool
+		Msg    string
+		Extra  interface{}
+	}{Msg: "false", Status: false, Extra: extra})
+	_, err := w.Write(j)
+	if err != nil {
+		log.Fatal("Error in JSON parse execution", err.Error())
+	}
+	return
+}

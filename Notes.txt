@@ -7,3 +7,13 @@ we add html and all into it
 docker run -it golang /bin/bash
 ADD from /working/to
 docker build -t imagename filename
+
+
+
+
+Docker Commands Used :
+
+Docker Hub Account >> Create New Repo
+Sign In from command line to repo  : docker login
+Create docker build : docker build -t dockeraccountname/repo/imagetag .
+Push tagged image into container registry : docker push dockeraccountname/repo/imagetag
