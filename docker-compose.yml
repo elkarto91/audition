@@ -1,0 +1,32 @@
+version: "3.3"
+
+services:
+  audition:
+    image: elkarto91/audirepo:sep263
+    expose:
+      - '8080'
+    container_name: 'audition'
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    networks:
+      - audition-net
+
+  mongo:
+    image: mongo:4.0.4
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    command: mongod
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db:/data/db
+    networks:
+      - audition-net
+    restart: always
+
+networks:
+  audition-net:
+    driver: bridge

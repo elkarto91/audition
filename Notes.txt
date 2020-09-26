@@ -17,3 +17,23 @@ Docker Hub Account >> Create New Repo
 Sign In from command line to repo  : docker login
 Create docker build : docker build -t dockeraccountname/repo/imagetag .
 Push tagged image into container registry : docker push dockeraccountname/repo/imagetag
+
+
+
+version: "3.3"
+
+services:
+  api:
+    image: elkarto91/audirepo:sep26
+    build: ./main
+    expose:
+      - '8080'
+    container_name: 'api'
+    ports:
+      - "8080:8080"
+    networks:
+      - api-net
+      -
+networks:
+  api-net:
+    driver: bridge

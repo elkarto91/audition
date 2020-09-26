@@ -26,7 +26,7 @@ func main() {
 	//Initialization of Mongo DB
 	err = databases.InitMongo()
 	if err != nil {
-		logger.Errorln("Mongo DB Initialization Error", err.Error())
+		logger.Fatalln("Mongo DB Initialization Error", err.Error())
 	}
 
 	//Serve Routes

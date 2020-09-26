@@ -13,7 +13,7 @@ import (
 func BasicAuthMiddleware(handler http.HandlerFunc) http.HandlerFunc {
 
 	logger := SetLoggerText()
-	logger.Infoln("Checking Basic Authentication")
+	//logger.Infoln("Checking Basic Authentication")
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
