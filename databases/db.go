@@ -24,7 +24,9 @@ const (
 
 //Mongo DB session initiation
 func getMongoSession() (*mgo.Session, error) {
-	session, err := mgo.Dial("0.0.0.0:27017")
+	//	session, err := mgo.Dial("localhost:27017")
+
+	session, err := mgo.Dial("mongo:27017")
 	if err != nil {
 		return nil, err
 	}
