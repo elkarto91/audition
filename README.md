@@ -43,3 +43,28 @@ project.
 - Documentation quality, ie: Content quality, completeness and accuracy.
 - Deployment automation, ie: Reduced number of manual steps.
 
+
+##Running Instructions for Running on Local System
+
+- Pull the repository https://github.com/elkarto91/audition
+- Execute Command -> docker-compose up -d
+- The app will be now running on http://localhost:8080/
+
+##Flow of Use
+
+- Open app at http://localhost:8080/login
+- Click on Register
+- Enter Admin Username as admin & Admin Password as password
+- Enter a unique user name and password
+- Upon registration , you will redirected to login page.
+- Login with the credentials
+- Dashboard will have user username displayed as logged in user and an option to logout.
+- Dashboard will host an option to enter a comment and submit
+- Dashboard will let you check palindrome validity and delete a comment
+
+
+##Other Information
+
+Application uses basic authentication to handle REST API calls from outside.
+
+The examples of REST API calls can be found in Documentation for Audition Document

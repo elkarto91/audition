@@ -1,39 +1,50 @@
-####
-golang compiled lang only binary is needed
-java is compiled and interpreted needs war jar and all
-if we run binary along with html pages,and dependencies app should run
-so we create a golang container
-we add html and all into it
-docker run -it golang /bin/bash
-ADD from /working/to
-docker build -t imagename filename
+Docker Commands
+
+Run the container to test
+
+docker run -it --rm -p 8080:8080 -v $PWD/src:/go/src/github.com/elkarto91/audition elkarto91/audirepo:sep262
+
+
+Purging All Unused or Dangling Images, Containers, Volumes, and Networks
+
+docker system prune
+docker system prune -a
+
+Removing images
+
+docker images -a
+docker rmi Image Image
+docker images -a | grep "pattern" | awk '{print $3}' | xargs docker rmi
+
+docker rmi $(docker images -a -q)
+
+
+Removing Containers
+
+docker ps -a
+docker rm ID_or_Name ID_or_Name
+docker ps -a | grep "pattern" | awk '{print $1}' | xargs docker rm
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+
+Removing Volumes
+
+docker volume ls
+docker volume rm volume_name volume_name
+docker rm -v container_name
+docker volume prune
 
 
 
+Docker Build :
+docker build -t repo:tag .
 
-Docker Commands Used :
-
-Docker Hub Account >> Create New Repo
-Sign In from command line to repo  : docker login
-Create docker build : docker build -t dockeraccountname/repo/imagetag .
-Push tagged image into container registry : docker push dockeraccountname/repo/imagetag
+Docker Push :
+docker push repo:tag
 
 
+EC2 :
 
-version: "3.3"
+ssh -p 22 -i "userkey.pem" ubuntu@ec2-host.compute-1.amazonaws.com
+scp -r -i yourkeyname.pem ~/path/to/your/project/folder/from/root ec2-user@host:~/
 
-services:
-  api:
-    image: elkarto91/audirepo:sep26
-    build: ./main
-    expose:
-      - '8080'
-    container_name: 'api'
-    ports:
-      - "8080:8080"
-    networks:
-      - api-net
-      -
-networks:
-  api-net:
-    driver: bridge
