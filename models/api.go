@@ -18,6 +18,9 @@ func RegisterUserAPI(w http.ResponseWriter, r *http.Request) {
 	logger := SetLoggerText()
 	logger.Infoln("Audition Application Register User REST Call")
 
+	info := r.URL.Query()
+	logger.Infoln("Info Received ", info)
+
 	adminName, ok := r.URL.Query()["adminun"]
 	if !ok || len(adminName[0]) < 1 {
 		logger.Errorln("Url Param 'Admin User Name' is missing")
@@ -142,13 +145,15 @@ func DeleteCommentAPI(w http.ResponseWriter, r *http.Request) {
 func CheckCommentAPI(w http.ResponseWriter, r *http.Request) {
 
 	logger := SetLoggerText()
-	logger.Infoln("Adding Comment")
+	logger.Infoln("Checking Comment")
 
 	commentID, ok := r.URL.Query()["commentid"]
 	if !ok || len(commentID[0]) < 1 {
 		logger.Errorln("Url Param 'commentid' is missing")
 		ReturnJSONAPIErrorWithMessage(w, ErrKeyMissing)
 	}
+	logger.Infoln("Fetching CommentId from DB")
+
 	com, err := databases.GetCommentByCommentId(commentID[0])
 	if err != nil {
 		logger.Errorln("Comment is missing in DB ", err.Error())
@@ -173,6 +178,4 @@ func CheckCommentAPI(w http.ResponseWriter, r *http.Request) {
 			ReturnJSONAPISuccess(w, data)
 		}
 	}
-	logger.Errorln("Comment is missing in DB ", ErrCommentMissing)
-	ReturnJSONAPIErrorWithMessage(w, ErrCommentMissing)
 }
