@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   audition:
-    image: elkarto91/audirepo:sep263
+    image: elkarto91/audirepo:sep265
     expose:
       - '8080'
     container_name: 'audition'

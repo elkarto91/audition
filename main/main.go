@@ -37,6 +37,7 @@ func main() {
 	r.HandleFunc("/", models.HandleHome).Methods("GET")
 	r.HandleFunc("/login", models.HandleHome).Methods("GET")
 	r.HandleFunc("/login", models.HandleDashboard).Methods("POST")
+
 	r.HandleFunc("/register", models.HandleRegistry).Methods("GET")
 	r.HandleFunc("/register", models.RegisterUser).Methods("POST")
 

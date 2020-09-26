@@ -37,9 +37,13 @@ func HandleDashboard(w http.ResponseWriter, r *http.Request) {
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
 
+	logger.Infoln("User Authentication : ", username, password)
+
 	user, err := databases.AuthenticateUser(username, password)
 	if err != nil {
 		logger.Errorln("Database updation error: ", err)
+		executeTemplate(w, "login.html", nil)
+
 	}
 	logger.Infoln("User Authenticated : ", user)
 
@@ -86,11 +90,11 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if admin != "admin" {
 		logger.Error("Admin Credential Mismatch ", ErrIncorrectAdminCredentials)
-		executeTemplate(w, "login.html", nil)
+		executeTemplate(w, "register.html", nil)
 	}
 	if adminpass != "password" {
 		logger.Error("Admin Credential Mismatch ", ErrIncorrectAdminCredentials)
-		executeTemplate(w, "login.html", nil)
+		executeTemplate(w, "register.html", nil)
 	}
 
 	err := databases.RegisterUser(user)
@@ -196,7 +200,7 @@ func CheckPaliendrome(comment string) bool {
 			endPointer--
 			continue
 		} else {
-			logger.Warningln("Character Mismatch at ", commentRune[startPointer], " and ", commentRune[endPointer])
+			logger.Warningln("Character Mismatch at ", string(commentRune[startPointer]), " and ", string(commentRune[endPointer]))
 			paliendromeFlag = false
 			return paliendromeFlag
 		}
