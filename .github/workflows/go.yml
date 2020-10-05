@@ -29,9 +29,10 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-
+    - name: Directory
+      working-directory: main
     - name: Build
-      run: go build main/main.go
+      run: go build main.go
 
     - name: Test
       run: go test main/main.go
