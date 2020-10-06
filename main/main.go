@@ -6,6 +6,8 @@ import (
 	"github.com/elkarto91/audition/databases"
 	"github.com/elkarto91/audition/models"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 )
@@ -32,6 +34,14 @@ func main() {
 	//Serve Routes
 	logger.Infoln("Opening API Routes ")
 
+	//Serve Routes
+	logger.Infoln("Initiate Metrics ")
+	models.RecordMetrics()
+	histogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "hash_duration_seconds",
+		Help: "Time taken to create hashes",
+	}, []string{"code"})
+
 	//Routes for UI
 	r := mux.NewRouter()
 	r.HandleFunc("/", models.HandleHome).Methods("GET")
@@ -55,6 +65,12 @@ func main() {
 	r.HandleFunc("/api/checkComment", models.BasicAuthMiddleware(http.HandlerFunc(models.CheckCommentAPI))).Methods("POST")
 	r.HandleFunc("/api/viewAllComment", models.BasicAuthMiddleware(http.HandlerFunc(models.GetAllCommentAPI))).Methods("GET")
 
+	r.Handle("/metrics", promhttp.Handler())
+	logger.Infoln("Connecting Prometheus ")
+	er := prometheus.Register(histogram)
+	if er != nil {
+		logger.Fatalln("Prometheus failed", err.Error())
+	}
 	//Start serve
 	err = http.ListenAndServe(":8080", r)
 	if err != nil {

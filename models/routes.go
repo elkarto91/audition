@@ -111,10 +111,10 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 	HeaderXframeUtility(w, r)
 
 	var req common.Comment
-	err := PostToInterface(r.Body, &req)
+	err := ConstructStucture(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 	logger.Infoln("The request received ", req)
 
@@ -122,10 +122,10 @@ func SubmitComment(w http.ResponseWriter, r *http.Request) {
 	err = databases.AddComment(&req)
 	if err != nil {
 		logger.Errorln("Database updation error: ", err)
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 	logger.Infoln("Database updated for user: ", req.Username)
-	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
+	SuccessAPI(w, struct{ Success bool }{true})
 
 }
 
@@ -136,21 +136,21 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 	HeaderXframeUtility(w, r)
 
 	var req common.Comment
-	err := PostToInterface(r.Body, &req)
+	err := ConstructStucture(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 
 	logger.Infoln("Deleting from Database ", req.CommentId)
 	status, err := databases.DeleteIfCommentExist(req.CommentId)
 	if err != nil {
 		logger.Errorln("Database Deletion error: ", err)
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 
 	logger.Infoln("Database updated for user: ", req.Username, " for comment id", req.CommentId, " with status", status)
-	ReturnJSONAPISuccess(w, struct{ Success bool }{true})
+	SuccessAPI(w, struct{ Success bool }{true})
 }
 func CheckComment(w http.ResponseWriter, r *http.Request) {
 
@@ -159,10 +159,10 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 	HeaderXframeUtility(w, r)
 
 	var req common.Comment
-	err := PostToInterface(r.Body, &req)
+	err := ConstructStucture(r.Body, &req)
 	if err != nil {
 		logger.Errorln("ERROR -------> ", err.Error())
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 
 	logger.Infoln("Checking Palindrome for ", req)
@@ -173,14 +173,14 @@ func CheckComment(w http.ResponseWriter, r *http.Request) {
 			Success bool
 			Msg     string
 		}{true, "Palindrome"}
-		ReturnJSONAPISuccess(w, data)
+		SuccessAPI(w, data)
 	} else {
 		logger.Infoln("Comment : ", req.Comment, " is not a paliendrome :", flag)
 		data := struct {
 			Success bool
 			Msg     string
 		}{true, "Not a Paliendrome"}
-		ReturnJSONAPISuccess(w, data)
+		SuccessAPI(w, data)
 	}
 }
 
@@ -220,14 +220,14 @@ func ViewAllComments(w http.ResponseWriter, r *http.Request) {
 	user, err := databases.AuthenticateUser(username, password)
 	if err != nil {
 		logger.Errorln("Database updation error: ", err)
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
 	logger.Infoln("User Authenticated : ", user)
 
 	comments, err := databases.ListAlComments()
 	if err != nil {
 		logger.Errorln("Database Comment error: ", err)
-		ReturnJSONAPIErrorWithMessage(w, err.Error())
+		ErrorAPI(w, err.Error())
 	}
-	ReturnJSONAPISuccess(w, comments)
+	SuccessAPI(w, comments)
 }

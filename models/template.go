@@ -33,14 +33,14 @@ func executeTemplate(w http.ResponseWriter, file string, data interface{}) {
 }
 
 //Utility method to read html body and json unmarshall into the structure
-func PostToInterface(Body io.ReadCloser, subject interface{}) error {
+func ConstructStucture(Body io.ReadCloser, subject interface{}) error {
 	u, _ := ioutil.ReadAll(Body)
 	err := json.Unmarshal(u, &subject)
 	return err
 }
 
 //Successful processing of JSON API
-func ReturnJSONAPISuccess(w http.ResponseWriter, extra interface{}) {
+func SuccessAPI(w http.ResponseWriter, extra interface{}) {
 	logger := SetLoggerText()
 
 	//Respond with JSON return value
@@ -60,7 +60,7 @@ func ReturnJSONAPISuccess(w http.ResponseWriter, extra interface{}) {
 }
 
 //Return Failure of Operation for API
-func ReturnJSONAPIErrorWithMessage(w http.ResponseWriter, extra interface{}) {
+func ErrorAPI(w http.ResponseWriter, extra interface{}) {
 
 	logger := SetLoggerText()
 

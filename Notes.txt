@@ -48,3 +48,35 @@ EC2 :
 ssh -p 22 -i "userkey.pem" ubuntu@ec2-host.compute-1.amazonaws.com
 scp -r -i yourkeyname.pem ~/path/to/your/project/folder/from/root ec2-user@host:~/
 
+
+
+
+
+
+
+
+master will read the template, especially the header
+apiVersion :v1 (it will look for kind named service)
+similiarly for next item we add another
+apiVersion : apps/v1
+kubernetes will be more modular and custom; we can define a service
+link (its an interface)
+statefulset is a workload(it will called by service)
+service will decide which pod should handle service
+Deployment,Statefulset etc are abstractions to pods
+if statefulset is down pvc wont go, becuase its another pod
+pvc
+pv
+container
+pod
+stateful etc
+interface service
+job
+stateful
+deployment all have containers so they are workloads
+selector and matcher are there for every workload
+service has a label and a selector , selector will have label of the workload you want to attach
+the service itself can create loadbalancer , any container i want to expose to publice i can use load balancer
+node port can also be used to redirect ports
+if worker nodes
+podAffinity can be used to tell where to run a service
